@@ -46,7 +46,22 @@ router.post("/auth/login", (req, res) => {
 	}));
 });
 
-router.use('/survey/', (req, res, next) => {
+router.get('/auth/logout', (req, res) => {
+	let data = auth.verify(req.headers.authorization);
+	if (data === false) {
+		res.clearCookie("auth");
+		res.status(403).end(JSON.stringify({
+			result: 403,
+		}, null, 4));
+		return;
+	}
+	auth.expire(data.token);
+	res.status(200).end(JSON.stringify({
+		result: 0
+	}, null, 4));
+});
+
+router.use((req, res, next) => {
 	let data = auth.verify(req.headers.authorization);
 	if (data === false) {
 		res.clearCookie("auth");
