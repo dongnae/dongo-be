@@ -2,6 +2,7 @@ const express = require('express');
 const queue = require('express-queue');
 const router = express.Router();
 
+const student = require("../lib/student");
 const auth = require("../lib/auth");
 const db = require("../lib/db");
 
@@ -33,6 +34,7 @@ router.post("/auth/login", (req, res) => {
 	if (token === false) {
 		res.status(400).end(JSON.stringify({
 			result: 1,
+			result_data: "잘못 입력하였습니다."
 		}, null, 4));
 		return;
 	}
@@ -149,6 +151,57 @@ router.post('/survey/submit', queue({activeLimit: 1, queuedLimit: -1}), async (r
 			result: 400,
 		}, null, 4));
 	}
+});
+
+router.get('/survey/result', async (req, res) => {
+	if (req.stu_info.num !== "admin") {
+		res.status(403).end(JSON.stringify({
+			result: 403,
+		}, null, 4));
+		return;
+	}
+
+	let stu = await db.getStudentCollection().find({}).toArray();
+	let survey = await db.getSurveyCollection().find({}).toArray();
+	let ret = {}, table = {};
+	for (let {id, name, quest} of survey) {
+		table[id] = {};
+		ret[id] = {
+			id,
+			name,
+			quest: {}
+		};
+		for (let {id: questId, ans} of quest) {
+			for (let {value, count} of ans) {
+				table[id][value] = count;
+				ret[id].quest[value] = {
+					value: value,
+					count: count,
+					students: []
+				};
+			}
+		}
+	}
+
+	for (let {num, submitted} of stu) {
+		for (let surveyId of Object.keys(submitted)) {
+			let surveyRes = submitted[surveyId];
+			for (let id of Object.keys(surveyRes)) {
+				for (let questRes of surveyRes[id]) {
+					let obj = ret[surveyId].quest;
+					obj[questRes].students.push({
+						num,
+						name: student.findByNum(num).name
+					});
+				}
+			}
+		}
+	}
+
+	res.status(200).end(JSON.stringify({
+		result: 0,
+		result_data: ret
+	}));
 });
 
 router.use((req, res) => res.status(404).end(JSON.stringify({
