@@ -80,8 +80,14 @@ router.use((req, res, next) => {
 router.get('/survey/list', async (req, res) => {
 	res.status(200).end(JSON.stringify({
 		result: 0,
-		result_data: await Promise.all((await db.getSurveyCollection().find({}).toArray()).map(async(obj) => {
-			return {name: obj.name, url: obj.id, disabled: !(await db.isSubmitted(req.stu_info.num, obj.id)), startTime: obj.startId, endTime: obj.endTime};
+		result_data: await Promise.all((await db.getSurveyCollection().find({}).toArray()).map(async (obj) => {
+			return {
+				name: obj.name,
+				url: obj.id,
+				disabled: !(await db.isSubmitted(req.stu_info.num, obj.id)),
+				startDate: obj.startDate,
+				endDate: obj.endDate
+			};
 		}))
 	}));
 });
