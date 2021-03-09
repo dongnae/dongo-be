@@ -190,8 +190,7 @@ router.get('/survey/result', async (req, res) => {
 			let surveyRes = submitted[surveyId];
 			for (let id of Object.keys(surveyRes)) {
 				for (let questRes of surveyRes[id]) {
-					let obj = ret[surveyId].quest;
-					obj[questRes].students.push({
+					ret[surveyId].quest[questRes].students.push({
 						num,
 						name: student.findByNum(num).name
 					});
