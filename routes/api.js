@@ -85,10 +85,13 @@ router.get('/survey/list', async (req, res) => {
 	res.status(200).end(JSON.stringify({
 		result: 0,
 		result_data: await Promise.all((await db.getSurveyCollection().find({}).toArray()).map(async (obj) => {
+			let submitted = await db.isSubmitted(req.stu_info.num, obj.id);
+			let permChk = obj.permission.includes(req.stu_info.num.substr(0, 1));
 			return {
 				name: obj.name,
 				url: obj.id,
-				disabled: !(await db.isSubmitted(req.stu_info.num, obj.id)),
+				disabled: submitted || !permChk,
+				error: (submitted ? "이미 제출한 설문입니다." : (!permChk ? "제출할 수 없는 설문입니다.\n다른 학년의 설문입니다.": null)),
 				startDate: obj.startDate,
 				endDate: obj.endDate
 			};
@@ -106,6 +109,13 @@ router.get('/survey/detail', async (req, res) => {
 	}
 	let data = await db.getSurveyCollection().findOne({id});
 	if (data === null) {
+		res.status(400).end(JSON.stringify({
+			result: 400
+		}));
+		return;
+	}
+	let permChk = data.permission.includes(req.stu_info.num.substr(0, 1));
+	if (!permChk) {
 		res.status(400).end(JSON.stringify({
 			result: 400
 		}));
