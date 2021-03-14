@@ -87,11 +87,12 @@ router.get('/survey/list', async (req, res) => {
 		result_data: await Promise.all((await db.getSurveyCollection().find({}).toArray()).map(async (obj) => {
 			let submitted = await db.isSubmitted(req.stu_info.num, obj.id);
 			let permChk = obj.permission.includes(req.stu_info.num.substr(0, 1));
+			let oldSurvey = Date.now() >= obj.endDate;
 			return {
 				name: obj.name,
 				url: obj.id,
-				disabled: submitted || !permChk,
-				error: (submitted ? "이미 제출한 설문입니다." : (!permChk ? "제출할 수 없는 설문입니다.\n다른 학년의 설문입니다.": null)),
+				disabled: submitted || !permChk || oldSurvey,
+				error: (submitted ? "이미 제출한 설문입니다." : (!permChk ? "제출할 수 없는 설문입니다.\n다른 학년의 설문입니다.": (oldSurvey ? "설문 기간이 지났습니다." : null))),
 				startDate: obj.startDate,
 				endDate: obj.endDate
 			};
