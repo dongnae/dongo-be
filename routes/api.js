@@ -77,7 +77,7 @@ router.use((req, res, next) => {
 	req.stu_info = data;
 
 	let token = auth.login(data);
-	res.cookie('auth', token);
+	res.header('Set-Cookie', `auth=${token}; expires=${new Date(Date.now() +  60 * 60 * 24 * 7 * 1000).toUTCString()}`);
 	next();
 });
 
@@ -92,7 +92,7 @@ router.get('/survey/list', async (req, res) => {
 				name: obj.name,
 				url: obj.id,
 				disabled: submitted || !permChk || oldSurvey,
-				error: (submitted ? "이미 제출한 설문입니다." : (!permChk ? "제출할 수 없는 설문입니다.\n다른 학년의 설문입니다.": (oldSurvey ? "설문 기간이 지났습니다." : null))),
+				error: (submitted ? "이미 제출한 설문입니다." : (!permChk ? "제출할 수 없는 설문입니다.\n다른 학년의 설문입니다." : (oldSurvey ? "설문 기간이 지났습니다." : null))),
 				startDate: obj.startDate,
 				endDate: obj.endDate
 			};
