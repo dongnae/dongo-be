@@ -38,6 +38,7 @@ router.post("/auth/login", (req, res) => {
 		}, null, 4));
 		return;
 	}
+	res.header('Set-Cookie', `auth=${token}; expires=${new Date(Date.now() + 60 * 60 * 24 * 7 * 1000).toUTCString()}; path=/`);
 	res.status(200).end(JSON.stringify({
 		result: 0,
 		result_data: Object.assign({
