@@ -77,7 +77,7 @@ router.use((req, res, next) => {
 	req.stu_info = data;
 
 	let token = auth.login(data);
-	res.header('Set-Cookie', `auth=${token}; expires=${new Date(Date.now() +  60 * 60 * 24 * 7 * 1000).toUTCString()}`);
+	res.header('Set-Cookie', `auth=${token}; expires=${new Date(Date.now() + 60 * 60 * 24 * 7 * 1000).toUTCString()}; path=/`);
 	next();
 });
 
