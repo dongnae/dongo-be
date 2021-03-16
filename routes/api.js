@@ -67,7 +67,7 @@ router.get('/auth/logout', (req, res) => {
 });
 
 router.use((req, res, next) => {
-	let data = auth.verify(req.headers.authorization);
+	let data = auth.verify(req.cookies.auth);
 	if (data === false) {
 		res.clearCookie("auth");
 		res.status(403).end(JSON.stringify({
@@ -77,8 +77,11 @@ router.use((req, res, next) => {
 	}
 	req.stu_info = data;
 
-	let token = auth.login(data);
-	res.header('Set-Cookie', `auth=${token}; expires=${new Date(Date.now() + 60 * 60 * 24 * 7 * 1000).toUTCString()}; path=/`);
+	if ((data.iat + 60 * 60 * 24) * 1000 < Date.now()) {
+		delete data.iat;
+		let token = auth.login(data);
+		res.header('Set-Cookie', `auth=${token}; expires=${new Date(Date.now() + 60 * 60 * 24 * 7 * 1000).toUTCString()}; path=/`);
+	}
 	next();
 });
 

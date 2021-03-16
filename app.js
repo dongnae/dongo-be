@@ -12,11 +12,14 @@ const db = require('./lib/db');
 db.connect();
 
 const cors = require("cors");
-app.use(cors());
+//app.use(cors());
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
 
 const apiRouter = require("./routes/api");
 app.use('/api/', apiRouter);
