@@ -38,7 +38,7 @@ router.post("/auth/login", (req, res) => {
 		}, null, 4));
 		return;
 	}
-	res.header('Set-Cookie', `auth=${token}; expires=${new Date(Date.now() + 60 * 60 * 24 * 7 * 1000).toUTCString()}; path=/`);
+	res.header('Set-Cookie', `auth=${token}; expires=${new Date(Date.now() + 60 * 60 * 24 * 7 * 1000).toUTCString()}; path=/; overwrite=true;`);
 	res.status(200).end(JSON.stringify({
 		result: 0,
 		result_data: Object.assign({
@@ -80,7 +80,7 @@ router.use((req, res, next) => {
 	if ((data.iat + 60 * 60 * 24) * 1000 < Date.now()) {
 		delete data.iat;
 		let token = auth.login(data);
-		res.header('Set-Cookie', `auth=${token}; expires=${new Date(Date.now() + 60 * 60 * 24 * 7 * 1000).toUTCString()}; path=/`);
+		res.header('Set-Cookie', `auth=${token}; expires=${new Date(Date.now() + 60 * 60 * 24 * 7 * 1000).toUTCString()}; path=/; overwrite=true;`);
 	}
 	next();
 });
