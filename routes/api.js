@@ -69,7 +69,7 @@ router.get('/auth/logout', (req, res) => {
 router.use((req, res, next) => {
 	let data = auth.verify(req.cookies.auth);
 	if (data === false) {
-		res.clearCookie("auth");
+		res.clearCookie("auth", {path: '/'});
 		res.status(403).end(JSON.stringify({
 			result: 403,
 		}, null, 4));
