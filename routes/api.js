@@ -16,7 +16,10 @@ router.post("/auth/login", (req, res) => {
 	let login_data;
 	if (typeof jwt === "string" && num === undefined && name === undefined) {
 		login_data = auth.verify(jwt);
-		if (typeof login_data === "object" && login_data.num !== null) login_data.name = student.findByNum(login_data.num);
+		if (typeof login_data === "object" && login_data.num !== null) {
+			let temp = student.findByNum(login_data.num);
+			if (temp !== null) login_data.name = temp.name;
+		}
 	} else if (jwt === undefined && typeof num === "string" && typeof name === "string") {
 		login_data = {
 			num: num,
