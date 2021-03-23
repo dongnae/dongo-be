@@ -205,6 +205,7 @@ router.get('/survey/result', async (req, res) => {
 			let surveyRes = submitted[surveyId];
 			for (let id of Object.keys(surveyRes)) {
 				for (let questRes of surveyRes[id]) {
+					if (ret[surveyId] === undefined || ret[surveyId].quest[questRes] === undefined) continue;
 					ret[surveyId].quest[questRes].students.push({
 						num,
 						name: student.findByNum(num).name
