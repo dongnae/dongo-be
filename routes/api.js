@@ -182,7 +182,7 @@ router.get('/survey/result', async (req, res) => {
 		return;
 	}
 
-	let group_by, class_by;
+	let group_by, ans_by;
 	{
 		let stu = await db.getStudentCollection().find({}).toArray();
 		let survey = await db.getSurveyCollection().find({}).toArray();
@@ -223,7 +223,7 @@ router.get('/survey/result', async (req, res) => {
 			for (let key2 of Object.keys(ret[key].quest))
 				ret[key].quest[key2].students.sort((a, b) => parseInt(a.num) - parseInt(b.num));
 
-		group_by = ret;
+		ans_by = ret;
 	}
 
 	{
@@ -260,7 +260,7 @@ router.get('/survey/result', async (req, res) => {
 			for (let key2 of Object.keys(ret[key].group))
 				ret[key].group[key2].students.sort((a, b) => parseInt(a.num) - parseInt(b.num));
 
-		class_by = ret;
+		group_by = ret;
 	}
 
 
@@ -268,7 +268,7 @@ router.get('/survey/result', async (req, res) => {
 		result: 0,
 		result_data: {
 			group_by,
-			class_by
+			ans_by
 		}
 	}));
 });
