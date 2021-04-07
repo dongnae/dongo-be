@@ -182,46 +182,94 @@ router.get('/survey/result', async (req, res) => {
 		return;
 	}
 
-	let stu = await db.getStudentCollection().find({}).toArray();
-	let survey = await db.getSurveyCollection().find({}).toArray();
-	let ret = {}, table = {};
-	for (let {id, name, quest} of survey) {
-		table[id] = {};
-		ret[id] = {
-			id,
-			name,
-			quest: {}
-		};
-		for (let {id: questId, ans} of quest) {
-			for (let {value, count} of ans) {
-				table[id][value] = count;
-				ret[id].quest[value] = {
-					value: value,
-					count: count,
-					students: []
-				};
-			}
-		}
-	}
-
-	for (let {num, submitted} of stu) {
-		for (let surveyId of Object.keys(submitted)) {
-			let surveyRes = submitted[surveyId];
-			for (let id of Object.keys(surveyRes)) {
-				for (let questRes of surveyRes[id]) {
-					if (ret[surveyId] === undefined || ret[surveyId].quest[questRes] === undefined) continue;
-					ret[surveyId].quest[questRes].students.push({
-						num,
-						name: student.findByNum(num).name
-					});
+	let group_by, class_by;
+	{
+		let stu = await db.getStudentCollection().find({}).toArray();
+		let survey = await db.getSurveyCollection().find({}).toArray();
+		let ret = {};
+		for (let {id, name, quest} of survey) {
+			ret[id] = {
+				id,
+				name,
+				quest: {}
+			};
+			for (let {id: questId, ans} of quest) {
+				for (let {value, count} of ans) {
+					ret[id].quest[value] = {
+						value: value,
+						count: count,
+						students: []
+					};
 				}
 			}
 		}
+
+		for (let {num, submitted} of stu) {
+			for (let surveyId of Object.keys(submitted)) {
+				let surveyRes = submitted[surveyId];
+				for (let id of Object.keys(surveyRes)) {
+					for (let questRes of surveyRes[id]) {
+						if (ret[surveyId] === undefined || ret[surveyId].quest[questRes] === undefined) continue;
+						ret[surveyId].quest[questRes].students.push({
+							num,
+							name: student.findByNum(num).name
+						});
+					}
+				}
+			}
+		}
+
+		for (let key of Object.keys(ret))
+			for (let key2 of Object.keys(ret[key].quest))
+				ret[key].quest[key2].students.sort((a, b) => parseInt(a.num) - parseInt(b.num));
+
+		group_by = ret;
 	}
+
+	{
+		let stu = await db.getStudentCollection().find({}).toArray();
+		let mp = {};
+		for (let {num, submitted} of stu) {
+			mp[num] = {};
+			for (let id of Object.keys(submitted)) mp[num][id] = Object.values(submitted[id]).map(arr => arr.join(", ")).filter(arr => arr.length > 0).join(", ");
+		}
+
+		let survey = await db.getSurveyCollection().find({}).toArray();
+		let ret = {};
+		for (let {id, name, permission} of survey) {
+			ret[id] = {
+				id,
+				name,
+				group: {}
+			};
+			for (let {num, name} of student.getAll()) {
+				let grade = num.substr(0, 1);
+				let group = num.substr(1, 2);
+				if (!permission.includes(grade)) continue;
+				let key = `${grade}-${group.substr(0, 1) === "0" ? group.substr(1) : group}`;
+				if (ret[id].group[key] === undefined) ret[id].group[key] = {value: key, students: []};
+				ret[id].group[key].students.push({
+					num,
+					name,
+					ans: mp[num][id] ?? "-"
+				});
+			}
+		}
+
+		for (let key of Object.keys(ret))
+			for (let key2 of Object.keys(ret[key].group))
+				ret[key].group[key2].students.sort((a, b) => parseInt(a.num) - parseInt(b.num));
+
+		class_by = ret;
+	}
+
 
 	res.status(200).end(JSON.stringify({
 		result: 0,
-		result_data: ret
+		result_data: {
+			group_by,
+			class_by
+		}
 	}));
 });
 
