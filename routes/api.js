@@ -46,7 +46,6 @@ router.post("/auth/login", (req, res) => {
 	res.status(200).end(JSON.stringify({
 		result: 0,
 		result_data: Object.assign({
-			jwt: auth.login(login_data),
 			num: login_data.num,
 			name: login_data.name,
 		}, login_data.num === "admin" ? {
