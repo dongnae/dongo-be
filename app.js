@@ -26,7 +26,7 @@ app.use('/api/', apiRouter);
 
 app.use(express.static(`${__dirname}/static/dist/`));
 app.use((req, res) => res.end(fs.readFileSync(`${__dirname}/static/dist/index.html`)));
-
+app.use((req, res) => res.end("error."));
 
 https.createServer({
 	cert: fs.readFileSync(`${__dirname}/data/ssl/cert.pem`),
