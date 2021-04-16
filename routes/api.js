@@ -98,6 +98,7 @@ router.get('/survey/list', async (req, res) => {
 			return {
 				name: obj.name,
 				url: obj.id,
+				desc: obj.desc,
 				disabled: submitted || !permChk || oldSurvey,
 				error: (submitted ? "이미 제출한 설문입니다." : (!permChk ? "제출할 수 없는 설문입니다.\n다른 학년의 설문입니다." : (oldSurvey ? "설문 기간이 지났습니다." : null))),
 				startDate: obj.startDate,
