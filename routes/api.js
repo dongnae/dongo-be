@@ -91,10 +91,11 @@ router.use((req, res, next) => {
 router.get('/survey/list', async (req, res) => {
 	res.status(200).end(JSON.stringify({
 		result: 0,
-		result_data: await Promise.all((await db.getSurveyCollection().find({}).toArray()).map(async (obj) => {
+		result_data: (await Promise.all((await db.getSurveyCollection().find({}).toArray()).map(async (obj) => {
 			let submitted = await db.isSubmitted(req.stu_info.num, obj.id);
 			let permChk = obj.permission.includes(req.stu_info.num.substr(0, 1));
 			let oldSurvey = Date.now() >= obj.endDate;
+			if (!permChk) return null;
 			return {
 				name: obj.name,
 				url: obj.id,
@@ -104,7 +105,7 @@ router.get('/survey/list', async (req, res) => {
 				startDate: obj.startDate,
 				endDate: obj.endDate
 			};
-		}))
+		}))).filter(obj => obj !== null)
 	}));
 });
 
