@@ -55,7 +55,7 @@ router.post("/auth/login", (req, res) => {
 });
 
 router.get('/auth/logout', (req, res) => {
-	let data = auth.verify(req.headers.authorization);
+	let data = auth.verify(req.cookies.auth);
 	if (data === false) {
 		res.clearCookie("auth");
 		res.status(403).end(JSON.stringify({
