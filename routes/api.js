@@ -96,6 +96,7 @@ router.get('/survey/list', async (req, res) => {
 			let permChk = obj.permission.includes(req.stu_info.num.substr(0, 1));
 			let oldSurvey = Date.now() >= obj.endDate;
 			if (!permChk) return null;
+			if (oldSurvey) return null;
 			return {
 				name: obj.name,
 				url: obj.id,
